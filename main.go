@@ -11,6 +11,7 @@ import (
 var (
 	addr           = flag.String("web.listen-address", ":9888", "Address on which to expose metrics and web interface.")
 	videoBridgeURL = flag.String("videobridge-url", "http://localhost:8080/colibri/stats", "Jitsi Videobridge /stats URL to scrape")
+	metricsPath    = flag.String("web.telemetry-path", "", "Prefix under which to expose metrics and health.")
 )
 
 type videoBridgeStats struct {
@@ -237,8 +238,8 @@ func main() {
 	log.SetFlags(0)
 	flag.Parse()
 
-	http.Handle("/metrics", handler{sourceURL: *videoBridgeURL})
-	http.HandleFunc("/health", func(w http.ResponseWriter, req *http.Request) {
+	http.Handle(*metricsPath+"/metrics", handler{sourceURL: *videoBridgeURL})
+	http.HandleFunc(*metricsPath+"/health", func(w http.ResponseWriter, req *http.Request) {
 		_, _ = w.Write([]byte(`ok`))
 	})
 	if err := http.ListenAndServe(*addr, nil); err != nil {
